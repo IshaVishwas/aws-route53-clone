@@ -1,0 +1,29 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Python Cache & Bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SQLite Database Files
+*.db
+*.sqlite
+*.sqlite3
+route53.db
+
+# Environment & Secrets
+.env
+.env.*
+*.env
+!.env.example
+
+# Temporary / Scratch
+scratch/
+tmp/
+logs/
+*.log
