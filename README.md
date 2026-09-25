@@ -1,335 +1,1143 @@
-﻿# AWS Route 53 Clone
+# AWS Route 53 Clone
 
-A full-stack replica of Amazon Route 53 DNS and Domain Management console built with **Next.js 16** (App Router, TypeScript) and **FastAPI** (Python 3.12, SQLAlchemy, SQLite). Faithfully reproduces the AWS Management Console visual design with complete CRUD functionality.
+A full-stack replica of the Amazon Route 53 DNS and Domain Management console built with **Next.js 16** (App Router, TypeScript) and **FastAPI** (Python 3.12, SQLAlchemy, SQLite). The project reproduces the AWS Management Console visual design with complete CRUD functionality for Hosted Zones and DNS Records.
+
+---
+
+## Live Demo
+
+### Frontend
+
+**AWS Route 53 Console:**  
+https://aws-route53-clone-pi.vercel.app
+
+### Backend
+
+**FastAPI Backend:**  
+https://aws-route53-backend-hz3g.onrender.com
+
+### API Documentation
+
+**Swagger UI:**  
+https://aws-route53-backend-hz3g.onrender.com/docs
+
+**ReDoc:**  
+https://aws-route53-backend-hz3g.onrender.com/redoc
 
 ---
 
 ## Architecture Overview
 
-`
+```text
+                         USER
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │     Vercel Frontend     │
+              │      Next.js 16         │
+              │   TypeScript / React    │
+              └────────────┬────────────┘
+                           │
+                           │ HTTPS API Requests
+                           ▼
+              ┌─────────────────────────┐
+              │     Render Backend      │
+              │        FastAPI          │
+              │      Python 3.12        │
+              └────────────┬────────────┘
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │      SQLite Database    │
+              │   SQLAlchemy ORM        │
+              └─────────────────────────┘
+```
+
+### Project Structure
+
+```text
 ROUTE 53/
-├── frontend/               # Next.js 16 (App Router, TypeScript, Vanilla CSS)
-│   └── src/
-│       ├── app/            # Dashboard, Hosted Zones, DNS Records, Login, Coming Soon pages
-│       ├── components/
-│       │   ├── layout/     # AppShell, Navbar, Sidebar, ComingSoon
-│       │   └── ui/         # Button, Badge, Modal, Table, SearchBar, Pagination, Toast, PageHeader
-│       └── lib/            # api.ts, auth-context.tsx, types.ts
 │
-├── backend/                # FastAPI (Python 3.12, SQLAlchemy 2.0, SQLite, Pydantic v2)
+├── frontend/                       # Next.js 16 frontend
+│   └── src/
+│       ├── app/
+│       │   ├── dashboard/           # Dashboard
+│       │   ├── hosted-zones/        # Hosted Zones pages
+│       │   ├── login/               # Login page
+│       │   └── ...                  # Other pages
+│       │
+│       ├── components/
+│       │   ├── layout/
+│       │   │   ├── AppShell
+│       │   │   ├── Navbar
+│       │   │   ├── Sidebar
+│       │   │   └── ComingSoon
+│       │   │
+│       │   └── ui/
+│       │       ├── Button
+│       │       ├── Badge
+│       │       ├── Modal
+│       │       ├── Table
+│       │       ├── SearchBar
+│       │       ├── Pagination
+│       │       ├── Toast
+│       │       └── PageHeader
+│       │
+│       └── lib/
+│           ├── api.ts
+│           ├── auth-context.tsx
+│           └── types.ts
+│
+├── backend/                        # FastAPI backend
 │   └── app/
-│       ├── api/v1/
-│       │   ├── auth.py         # POST /auth/login, POST /auth/logout, GET /auth/session
-│       │   ├── hosted_zones.py # Full CRUD for hosted zones
-│       │   ├── dns_records.py  # Full CRUD for DNS records
-│       │   └── router.py       # API v1 router aggregator
-│       ├── core/               # config.py, database.py, security.py, seed.py
-│       ├── models/             # base.py, auth.py, hosted_zone.py, dns_record.py
-│       ├── schemas/            # auth.py, hosted_zone.py, dns_record.py
-│       └── main.py             # FastAPI entrypoint with lifespan (DB init + seed)
+│       ├── api/
+│       │   └── v1/
+│       │       ├── auth.py
+│       │       ├── hosted_zones.py
+│       │       ├── dns_records.py
+│       │       └── router.py
+│       │
+│       ├── core/
+│       │   ├── config.py
+│       │   ├── database.py
+│       │   ├── security.py
+│       │   └── seed.py
+│       │
+│       ├── models/
+│       │   ├── base.py
+│       │   ├── auth.py
+│       │   ├── hosted_zone.py
+│       │   └── dns_record.py
+│       │
+│       ├── schemas/
+│       │   ├── auth.py
+│       │   ├── hosted_zone.py
+│       │   └── dns_record.py
+│       │
+│       └── main.py
 │
 ├── .gitignore
 ├── .env.example
 └── README.md
-`
+```
 
 ---
 
-## Tech Stack
+# Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend Framework | Next.js 16 (App Router) |
-| Frontend Language | TypeScript |
-| Styling | Vanilla CSS + inline styles (AWS Console design system) |
-| Icons | Lucide React |
-| Backend Framework | FastAPI |
-| Backend Language | Python 3.12 |
-| ORM | SQLAlchemy 2.0 |
-| Database | SQLite (embedded, file-based) |
-| Validation | Pydantic v2 |
-| ASGI Server | Uvicorn |
-| Authentication | Mock session-based auth (PBKDF2 hashing, Bearer tokens in SQLite) |
+## Frontend
+
+| Technology | Purpose |
+|---|---|
+| **Next.js 16** | React framework using App Router |
+| **React** | UI development |
+| **TypeScript** | Type-safe frontend development |
+| **Vanilla CSS** | Styling and AWS Console-inspired design |
+| **Lucide React** | Icons |
+| **Vercel** | Frontend deployment |
+
+## Backend
+
+| Technology | Purpose |
+|---|---|
+| **Python 3.12** | Backend programming language |
+| **FastAPI** | REST API framework |
+| **Uvicorn** | ASGI server |
+| **SQLAlchemy 2.0** | ORM and database interaction |
+| **SQLite** | File-based relational database |
+| **Pydantic v2** | Request/response validation |
+| **Render** | Backend deployment |
+
+## Authentication & Security
+
+| Technology | Purpose |
+|---|---|
+| **PBKDF2-HMAC-SHA256** | Password hashing |
+| **Random Salt** | Password hash protection |
+| **Bearer Tokens** | API authentication |
+| **Server-side Sessions** | Session management |
+| **CORS** | Cross-origin request protection |
 
 ---
 
-## Implemented Features
+# Implemented Features
 
-### Authentication
+## Authentication
+
 - [x] Login with email/password
-- [x] Logout (server-side session invalidation)
-- [x] Session persistence via localStorage + backend session validation
-- [x] Protected routes — unauthenticated users redirected to /login
-- [x] Logged-in user email shown in navbar
-- [x] Toast notifications for auth success/errors
+- [x] Logout with server-side session invalidation
+- [x] Session persistence through localStorage
+- [x] Backend session validation
+- [x] Protected routes
+- [x] Unauthenticated users redirected to `/login`
+- [x] Logged-in user email displayed in navbar
+- [x] Toast notifications for authentication success/errors
+- [x] Bearer token authentication
 
-### Hosted Zones
-- [x] List all hosted zones with live record count
+---
+
+## Hosted Zones
+
+- [x] List all hosted zones
+- [x] Live DNS record count for each zone
 - [x] Search hosted zones by name
-- [x] Filter by type (Public / Private)
+- [x] Filter hosted zones by type
+- [x] Public hosted zones
+- [x] Private hosted zones
 - [x] Pagination
-- [x] Create hosted zone (with AWS-style zone ID generation, e.g. Z1D633PJN98FT9)
+- [x] Create hosted zone
+- [x] AWS-style hosted zone ID generation
 - [x] Edit hosted zone comment
 - [x] Delete hosted zone
-- [x] Zone details view with record summary
-- [x] Duplicate name detection (409 Conflict)
+- [x] Hosted zone details view
+- [x] Record summary
+- [x] Duplicate domain name detection
+- [x] HTTP `409 Conflict` handling for duplicate zones
 
-### DNS Records (inside Hosted Zones)
-- [x] List all DNS records for a zone
-- [x] Search records by name or value
-- [x] Filter by record type
-- [x] Pagination
-- [x] Create record (A, AAAA, CNAME, TXT, MX, NS, PTR, SRV, CAA)
-- [x] Edit record (TTL, value, priority)
-- [x] Delete record
-- [x] Priority field shown for MX and SRV records
+Example AWS-style zone ID:
 
-### UI/UX
-- [x] AWS Management Console-style dark navbar (Squid Ink #161e2e)
-- [x] Left sidebar with active route highlighting
-- [x] Responsive layout (mobile hamburger menu)
-- [x] Toast notification system (success, error, warning, info)
-- [x] Modal dialogs for Create / Edit / Delete / Details
-- [x] Loading states and empty states
-- [x] Traffic Policies, Health Checks, Resolver, Profiles — Coming Soon pages
+```text
+Z1D633PJN98FT9
+```
 
 ---
 
-## Quick Start
+## DNS Records
 
-### Prerequisites
+DNS record management is implemented inside Hosted Zones.
+
+### Supported Record Types
+
+- A
+- AAAA
+- CNAME
+- TXT
+- MX
+- NS
+- PTR
+- SRV
+- CAA
+
+### Operations
+
+- [x] List DNS records
+- [x] Search records by name
+- [x] Search records by value
+- [x] Filter records by type
+- [x] Pagination
+- [x] Create DNS records
+- [x] Edit DNS records
+- [x] Delete DNS records
+- [x] Configure TTL
+- [x] Configure record value
+- [x] Configure priority
+- [x] Priority support for MX records
+- [x] Priority support for SRV records
+
+---
+
+# UI / UX
+
+The frontend is designed to resemble the AWS Management Console.
+
+### Implemented UI Features
+
+- [x] AWS Management Console-style dark navbar
+- [x] AWS-inspired color system
+- [x] Left navigation sidebar
+- [x] Active route highlighting
+- [x] Responsive layout
+- [x] Mobile hamburger navigation
+- [x] Search bars
+- [x] Tables
+- [x] Pagination
+- [x] Badges
+- [x] Toast notifications
+- [x] Modal dialogs
+- [x] Create dialogs
+- [x] Edit dialogs
+- [x] Delete confirmation dialogs
+- [x] Details dialogs
+- [x] Loading states
+- [x] Empty states
+- [x] Error states
+
+The application also contains placeholder pages for:
+
+- Traffic Policies
+- Health Checks
+- Resolver
+- Profiles
+
+These sections are currently marked as **Coming Soon**.
+
+---
+
+# Quick Start
+
+## Prerequisites
+
+Make sure the following are installed:
+
 - Node.js >= 18
 - Python 3.12
 - npm >= 9
 - Git
 
-### 1. Clone the Repository
+---
 
-`ash
+## 1. Clone the Repository
+
+```bash
 git clone <repo-url>
 cd "ROUTE 53"
-`
+```
 
-### 2. Backend Setup
+---
 
-`ash
+# Backend Setup
+
+## 2. Create Virtual Environment
+
+```bash
 cd backend
 
-# Create Python 3.12 virtual environment
 py -3.12 -m venv venv
+```
 
-# Activate (Windows PowerShell)
+### Windows PowerShell
+
+```powershell
 .\venv\Scripts\Activate.ps1
+```
 
-# Activate (macOS/Linux)
-# source venv/bin/activate
+### macOS / Linux
 
-# Install dependencies
+```bash
+source venv/bin/activate
+```
+
+---
+
+## 3. Install Backend Dependencies
+
+```bash
 pip install --upgrade pip
 pip install -r requirements.txt
+```
 
-# Start dev server
+---
+
+## 4. Start Backend Server
+
+```bash
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-`
+```
 
-Backend auto-creates SQLite database and seeds the demo user on first startup.
+The backend automatically:
 
-- API Base URL: http://127.0.0.1:8000
-- Swagger UI Docs: http://127.0.0.1:8000/docs
-- ReDoc: http://127.0.0.1:8000/redoc
+- Creates the SQLite database
+- Creates the required database tables
+- Seeds the demo user on first startup
 
-### 3. Frontend Setup
+### Local Backend URLs
 
-`ash
+API Base URL:
+
+```text
+http://127.0.0.1:8000
+```
+
+Swagger UI:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+ReDoc:
+
+```text
+http://127.0.0.1:8000/redoc
+```
+
+Health Check:
+
+```text
+http://127.0.0.1:8000/api/v1/health
+```
+
+---
+
+# Frontend Setup
+
+## 5. Install Frontend Dependencies
+
+Open another terminal:
+
+```bash
 cd frontend
 npm install
+```
+
+---
+
+## 6. Start Frontend
+
+```bash
 npm run dev
-`
+```
 
-Web App: http://localhost:3000
+The frontend will be available at:
 
-### 4. Demo Login Credentials
-
-| Field    | Value                   |
-|----------|-------------------------|
-| Email    | admin@route53.aws       |
-| Password | AdminPassword123!       |
+```text
+http://localhost:3000
+```
 
 ---
 
-## Database Schema
+# Demo Login Credentials
 
-### users
-| Column        | Type        | Notes                          |
-|---------------|-------------|-------------------------------|
-| id            | TEXT (UUID) | Primary Key                   |
-| email         | TEXT        | Unique, not null               |
-| password_hash | TEXT        | PBKDF2-HMAC-SHA256 (salt+hash) |
-| created_at    | DATETIME    | UTC                            |
+Use the following credentials to access the application:
 
-### sessions
-| Column     | Type        | Notes                                  |
-|------------|-------------|----------------------------------------|
-| id         | TEXT (UUID) | Primary Key                            |
-| user_id    | TEXT        | FK to users.id                         |
-| token      | TEXT        | URL-safe random token (64 chars)       |
-| expires_at | DATETIME    | UTC — 24h from creation                |
-| created_at | DATETIME    | UTC                                    |
-
-### hosted_zones
-| Column      | Type        | Notes                              |
-|-------------|-------------|-------------------------------------|
-| id          | TEXT (UUID) | Primary Key                         |
-| zone_id     | TEXT        | AWS-style ID (e.g. Z1D633PJN98FT9) |
-| name        | TEXT        | Domain name, Unique                 |
-| type        | TEXT        | PUBLIC or PRIVATE                   |
-| comment     | TEXT        | Optional description                |
-| private_zone| BOOLEAN     | Derived from type                   |
-| created_at  | DATETIME    | UTC                                 |
-| updated_at  | DATETIME    | UTC                                 |
-
-### dns_records
-| Column         | Type        | Notes                                      |
-|----------------|-------------|---------------------------------------------|
-| id             | TEXT (UUID) | Primary Key                                 |
-| hosted_zone_id | TEXT        | FK to hosted_zones.id                       |
-| name           | TEXT        | Record name (e.g. www, @)                   |
-| type           | TEXT        | A, AAAA, CNAME, TXT, MX, NS, PTR, SRV, CAA |
-| ttl            | INTEGER     | Time-to-live in seconds                     |
-| value          | TEXT        | Record value/target                         |
-| priority       | INTEGER     | Nullable — used for MX and SRV              |
-| created_at     | DATETIME    | UTC                                         |
-| updated_at     | DATETIME    | UTC                                         |
+| Field | Value |
+|---|---|
+| Email | `admin@route53.aws` |
+| Password | `AdminPassword123!` |
 
 ---
 
-## API Overview
+# Database Schema
 
-All endpoints are prefixed with /api/v1. Protected endpoints require: Authorization: Bearer <token>
+The project uses SQLite with SQLAlchemy.
 
-### Authentication
-| Method | Path           | Auth | Description                              |
-|--------|----------------|------|------------------------------------------|
-| POST   | /auth/login    | No   | Login with email+password, returns token |
-| POST   | /auth/logout   | Yes  | Invalidate current session token         |
-| GET    | /auth/session  | Yes  | Validate token, returns current user     |
+## users
 
-### Hosted Zones
-| Method | Path                      | Auth | Description                              |
-|--------|---------------------------|------|------------------------------------------|
-| GET    | /hosted-zones             | Yes  | List zones (search, type filter, paging) |
-| POST   | /hosted-zones             | Yes  | Create a new hosted zone                 |
-| GET    | /hosted-zones/{zone_id}   | Yes  | Get a single hosted zone                 |
-| PUT    | /hosted-zones/{zone_id}   | Yes  | Update hosted zone comment               |
-| DELETE | /hosted-zones/{zone_id}   | Yes  | Delete a hosted zone                     |
-
-### DNS Records
-| Method | Path                              | Auth | Description                              |
-|--------|-----------------------------------|------|------------------------------------------|
-| GET    | /hosted-zones/{zone_id}/records   | Yes  | List records (search, type filter, paging)|
-| POST   | /hosted-zones/{zone_id}/records   | Yes  | Create a new DNS record                  |
-| GET    | /records/{record_id}              | Yes  | Get a single DNS record                  |
-| PUT    | /records/{record_id}              | Yes  | Update a DNS record                      |
-| DELETE | /records/{record_id}              | Yes  | Delete a DNS record                      |
-
-### System
-| Method | Path    | Auth | Description                    |
-|--------|---------|------|--------------------------------|
-| GET    | /health | No   | Health check (service + DB)    |
-
----
-
-## Security Notes
-
-- Passwords are hashed with PBKDF2-HMAC-SHA256 with a random salt (100,000 iterations).
-- Session tokens are cryptographically random URL-safe 64-character strings.
-- Sessions expire after 24 hours and are validated on every protected API call.
-- CORS is configured to allow only http://localhost:3000 in development.
-
----
-
-## Lint and Build
-
-`ash
-# Frontend lint (ESLint)
-cd frontend && npm run lint
-
-# Frontend production build
-cd frontend && npm run build
-
-# Backend import sanity check
-cd backend && .\venv\Scripts\python.exe -c "from app.main import app; print('Backend OK')"
-`
-
----
-
-## Environment Variables
-
-Copy `.env.example` to respective configuration files:
-
-### Frontend (`frontend/.env.local`)
-| Variable | Default | Description |
+| Column | Type | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://127.0.0.1:8000/api/v1` | Backend API base URL consumed by browser client |
+| `id` | TEXT (UUID) | Primary Key |
+| `email` | TEXT | Unique, not null |
+| `password_hash` | TEXT | PBKDF2-HMAC-SHA256 |
+| `created_at` | DATETIME | UTC |
 
-### Backend (`backend/.env`)
-| Variable | Default | Description |
+---
+
+## sessions
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT (UUID) | Primary Key |
+| `user_id` | TEXT | Foreign Key to `users.id` |
+| `token` | TEXT | URL-safe random token |
+| `expires_at` | DATETIME | UTC, 24 hours from creation |
+| `created_at` | DATETIME | UTC |
+
+---
+
+## hosted_zones
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT (UUID) | Primary Key |
+| `zone_id` | TEXT | AWS-style zone ID |
+| `name` | TEXT | Domain name, unique |
+| `type` | TEXT | `PUBLIC` or `PRIVATE` |
+| `comment` | TEXT | Optional description |
+| `private_zone` | BOOLEAN | Derived from type |
+| `created_at` | DATETIME | UTC |
+| `updated_at` | DATETIME | UTC |
+
+---
+
+## dns_records
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT (UUID) | Primary Key |
+| `hosted_zone_id` | TEXT | Foreign Key to hosted zone |
+| `name` | TEXT | Record name |
+| `type` | TEXT | A, AAAA, CNAME, TXT, MX, NS, PTR, SRV, CAA |
+| `ttl` | INTEGER | Time-to-live in seconds |
+| `value` | TEXT | Record value/target |
+| `priority` | INTEGER | Nullable, used for MX and SRV |
+| `created_at` | DATETIME | UTC |
+| `updated_at` | DATETIME | UTC |
+
+---
+
+# API Overview
+
+All API endpoints are prefixed with:
+
+```text
+/api/v1
+```
+
+Protected endpoints require:
+
+```http
+Authorization: Bearer <token>
+```
+
+---
+
+# Authentication API
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/auth/login` | No | Login with email and password |
+| POST | `/auth/logout` | Yes | Invalidate current session |
+| GET | `/auth/session` | Yes | Validate current session |
+
+### Login
+
+```http
+POST /api/v1/auth/login
+```
+
+Example request:
+
+```json
+{
+  "email": "admin@route53.aws",
+  "password": "AdminPassword123!"
+}
+```
+
+The backend returns an authentication token that is used for protected API requests.
+
+---
+
+# Hosted Zones API
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/hosted-zones` | Yes | List hosted zones |
+| POST | `/hosted-zones` | Yes | Create hosted zone |
+| GET | `/hosted-zones/{zone_id}` | Yes | Get hosted zone |
+| PUT | `/hosted-zones/{zone_id}` | Yes | Update hosted zone |
+| DELETE | `/hosted-zones/{zone_id}` | Yes | Delete hosted zone |
+
+Supported operations include:
+
+- Search
+- Type filtering
+- Pagination
+- Creation
+- Editing
+- Deletion
+- Duplicate name validation
+
+---
+
+# DNS Records API
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/hosted-zones/{zone_id}/records` | Yes | List DNS records |
+| POST | `/hosted-zones/{zone_id}/records` | Yes | Create DNS record |
+| GET | `/records/{record_id}` | Yes | Get DNS record |
+| PUT | `/records/{record_id}` | Yes | Update DNS record |
+| DELETE | `/records/{record_id}` | Yes | Delete DNS record |
+
+---
+
+# System API
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/health` | No | Backend and database health check |
+
+Example:
+
+```text
+GET /api/v1/health
+```
+
+---
+
+# Security
+
+The application implements the following security mechanisms.
+
+## Password Hashing
+
+Passwords are hashed using:
+
+```text
+PBKDF2-HMAC-SHA256
+```
+
+with:
+
+- Random salt
+- 100,000 iterations
+
+Passwords are not stored as plaintext.
+
+---
+
+## Session Authentication
+
+Authentication uses:
+
+```text
+Bearer Tokens
+```
+
+Session tokens are cryptographically random URL-safe strings.
+
+Sessions:
+
+- Are stored server-side
+- Expire after 24 hours
+- Are validated on protected API requests
+- Can be invalidated during logout
+
+---
+
+## CORS
+
+CORS is configured through:
+
+```text
+BACKEND_CORS_ORIGINS
+```
+
+The production backend allows the deployed Vercel frontend:
+
+```text
+https://aws-route53-clone-pi.vercel.app
+```
+
+---
+
+# Lint and Build
+
+## Frontend Lint
+
+```bash
+cd frontend
+npm run lint
+```
+
+---
+
+## Frontend Production Build
+
+```bash
+cd frontend
+npm run build
+```
+
+---
+
+## Backend Import Check
+
+Windows:
+
+```bash
+cd backend
+.\venv\Scripts\python.exe -c "from app.main import app; print('Backend OK')"
+```
+
+---
+
+# Environment Variables
+
+Environment variables are used to configure the frontend and backend independently.
+
+---
+
+## Frontend Environment Variables
+
+File:
+
+```text
+frontend/.env.local
+```
+
+### Local Development
+
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1
+```
+
+### Production
+
+```env
+NEXT_PUBLIC_API_URL=https://aws-route53-backend-hz3g.onrender.com/api/v1
+```
+
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL consumed by the browser client |
+
+---
+
+# Backend Environment Variables
+
+File:
+
+```text
+backend/.env
+```
+
+| Variable | Local Default | Description |
 |---|---|---|
 | `PROJECT_NAME` | `AWS Route 53 Clone API` | API service display name |
-| `API_V1_STR` | `/api/v1` | API version 1 route prefix |
-| `BACKEND_HOST` | `127.0.0.1` | Binding host IP |
-| `BACKEND_PORT` | `8000` | Binding port number |
-| `DATABASE_URL` | `sqlite:///./route53.db` | SQLAlchemy SQLite database URL |
+| `API_V1_STR` | `/api/v1` | API version route prefix |
+| `BACKEND_HOST` | `127.0.0.1` | Backend binding host |
+| `BACKEND_PORT` | `8000` | Backend port |
+| `DATABASE_URL` | `sqlite:///./route53.db` | SQLAlchemy database URL |
 | `SECRET_KEY` | `dev-secret-key-change-in-production` | Secret key for cryptographic operations |
-| `BACKEND_CORS_ORIGINS` | `["http://localhost:3000","http://127.0.0.1:3000"]` | Allowed CORS origins (JSON array or comma-separated) |
+| `BACKEND_CORS_ORIGINS` | Localhost origins | Allowed CORS origins |
 
 ---
 
-## Testing Instructions
+## Local CORS Configuration
 
-### 1. Backend Automated Unit Tests (33 Tests)
-Run Python's built-in unittest runner to execute all hosted zone and DNS record tests:
+For local development:
+
+```env
+BACKEND_CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000"]
+```
+
+---
+
+## Production CORS Configuration
+
+For the deployed Vercel frontend:
+
+```env
+BACKEND_CORS_ORIGINS=["https://aws-route53-clone-pi.vercel.app"]
+```
+
+The Vercel URL must be an exact origin.
+
+Do not add a trailing slash:
+
+```text
+Correct:
+https://aws-route53-clone-pi.vercel.app
+
+Incorrect:
+https://aws-route53-clone-pi.vercel.app/
+```
+
+---
+
+# Testing
+
+## Backend Automated Unit Tests
+
+The backend contains automated tests for hosted zones and DNS records.
+
+Run:
+
 ```bash
 cd backend
 python -m unittest discover tests
 ```
 
-### 2. Backend Live E2E Verification
-Verify full live workflow against running backend server:
+---
+
+## Backend Live E2E Verification
+
+Run:
+
 ```bash
 cd backend
+
 python tests/e2e_dns_live_check.py
 python tests/e2e_live_check.py
 ```
 
-### 3. Frontend Quality Checks
-Run ESLint validation and Turbopack production compilation:
+---
+
+## Frontend Quality Checks
+
+Run:
+
 ```bash
 cd frontend
+
 npm run lint
 npm run build
 ```
 
 ---
 
-## Deployment Instructions
+# Deployment
 
-### Architecture in Production
-- **Frontend**: Next.js 16 App Router deployed on platforms like **Vercel** or **AWS Amplify**. Set `NEXT_PUBLIC_API_URL` to the public HTTPS backend URL (e.g. `https://api.yourdomain.com/api/v1`).
-- **Backend**: FastAPI with Uvicorn deployed on container/PaaS platforms like **Render**, **Railway**, **Fly.io**, or **AWS EC2/App Runner**. Set `BACKEND_CORS_ORIGINS` to include the frontend production domain.
+The application is deployed using a separate frontend/backend architecture.
 
-### SQLite Database Persistence in Deployment
-Because SQLite is a file-based database, deploy the backend with a **persistent disk/volume mount** (e.g., `/data/route53.db`) and set:
-```env
-DATABASE_URL=sqlite:////data/route53.db
+## Production Architecture
+
+```text
+                        INTERNET
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │         Vercel          │
+              │                         │
+              │      Next.js 16         │
+              │      Frontend           │
+              └────────────┬────────────┘
+                           │
+                           │ HTTPS
+                           │ REST API
+                           ▼
+              ┌─────────────────────────┐
+              │         Render          │
+              │                         │
+              │       FastAPI           │
+              │      Python 3.12        │
+              └────────────┬────────────┘
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │         SQLite          │
+              │       Database          │
+              └─────────────────────────┘
 ```
-This ensures database persistence across container restarts and redeployments. Alternatively, configure `DATABASE_URL` with a managed database service URL if migrating beyond single-instance SQLite.
 
 ---
 
-## Hosted Demo URL
+# Vercel Frontend Deployment
 
-> **Deployment Status**: Pre-deployment audit passed. Ready for deployment.
->
-> - **Frontend Console URL**: `[Pending Deployment]`
-> - **Backend API URL / Docs**: `[Pending Deployment]`
+The frontend is deployed on Vercel.
+
+### Production Frontend
+
+```text
+https://aws-route53-clone-pi.vercel.app
+```
+
+The Vercel project uses the:
+
+```text
+frontend/
+```
+
+directory as its root directory.
+
+### Frontend Environment Variable
+
+Set:
+
+```env
+NEXT_PUBLIC_API_URL=https://aws-route53-backend-hz3g.onrender.com/api/v1
+```
+
+This allows the browser to send API requests to the deployed Render backend.
+
+---
+
+# Render Backend Deployment
+
+The backend is deployed on Render.
+
+### Production Backend
+
+```text
+https://aws-route53-backend-hz3g.onrender.com
+```
+
+### API Base URL
+
+```text
+https://aws-route53-backend-hz3g.onrender.com/api/v1
+```
+
+### Swagger
+
+```text
+https://aws-route53-backend-hz3g.onrender.com/docs
+```
+
+The Render service uses the:
+
+```text
+backend/
+```
+
+directory as its working directory.
+
+---
+
+# Production Environment Configuration
+
+## Vercel
+
+```env
+NEXT_PUBLIC_API_URL=https://aws-route53-backend-hz3g.onrender.com/api/v1
+```
+
+## Render
+
+```env
+BACKEND_CORS_ORIGINS=["https://aws-route53-clone-pi.vercel.app"]
+```
+
+The CORS configuration is required because the frontend and backend are hosted on different domains.
+
+---
+
+# Production Request Flow
+
+When a user interacts with the deployed application:
+
+```text
+Browser
+   │
+   ▼
+https://aws-route53-clone-pi.vercel.app
+   │
+   │ API Request
+   ▼
+https://aws-route53-backend-hz3g.onrender.com/api/v1
+   │
+   │ SQLAlchemy
+   ▼
+SQLite Database
+```
+
+For example, during login:
+
+```text
+User enters credentials
+        │
+        ▼
+Vercel Frontend
+        │
+        │ POST /api/v1/auth/login
+        ▼
+Render FastAPI Backend
+        │
+        ▼
+Validate credentials
+        │
+        ▼
+Create session
+        │
+        ▼
+Return Bearer Token
+        │
+        ▼
+Frontend stores session
+```
+
+---
+
+# SQLite Deployment Note
+
+The current deployment uses SQLite because the project is deployed using the free Render setup.
+
+SQLite is a file-based database.
+
+Because the free deployment does not provide a persistent disk, SQLite data should **not be considered permanent production storage**.
+
+Data may be reset after certain:
+
+- Redeployments
+- Service restarts
+- Instance changes
+- Ephemeral filesystem resets
+
+For a durable production deployment, the database can be migrated to:
+
+- PostgreSQL
+- Another managed relational database
+- A hosting plan with persistent disk support
+
+---
+
+# Deployment Steps
+
+To deploy the project from scratch:
+
+### 1. Deploy Backend
+
+Deploy the `backend` directory to Render.
+
+Configure:
+
+```env
+DATABASE_URL=sqlite:///./route53.db
+```
+
+and:
+
+```env
+BACKEND_CORS_ORIGINS=["https://aws-route53-clone-pi.vercel.app"]
+```
+
+---
+
+### 2. Deploy Frontend
+
+Deploy the `frontend` directory to Vercel.
+
+Set:
+
+```env
+NEXT_PUBLIC_API_URL=https://aws-route53-backend-hz3g.onrender.com/api/v1
+```
+
+---
+
+### 3. Redeploy Backend
+
+After changing backend environment variables, redeploy the Render service so the new environment configuration is loaded.
+
+---
+
+### 4. Verify Backend
+
+Open:
+
+```text
+https://aws-route53-backend-hz3g.onrender.com/docs
+```
+
+Verify that Swagger loads correctly.
+
+---
+
+### 5. Verify Frontend
+
+Open:
+
+```text
+https://aws-route53-clone-pi.vercel.app
+```
+
+Verify:
+
+- Login
+- Dashboard
+- Hosted Zones
+- DNS Records
+- Create operations
+- Edit operations
+- Delete operations
+- Search
+- Filtering
+- Pagination
+- Logout
+
+---
+
+# CORS Troubleshooting
+
+If the deployed frontend displays:
+
+```text
+Failed to fetch
+```
+
+or the browser console displays:
+
+```text
+blocked by CORS policy
+```
+
+verify that the Render environment variable contains the exact Vercel origin:
+
+```env
+BACKEND_CORS_ORIGINS=["https://aws-route53-clone-pi.vercel.app"]
+```
+
+Make sure:
+
+- `https://` is included
+- There is no trailing `/`
+- The Vercel domain is correct
+- The Render backend has been redeployed after changing the variable
+
+---
+
+# API Health Check
+
+The deployed backend provides a health endpoint:
+
+```text
+https://aws-route53-backend-hz3g.onrender.com/api/v1/health
+```
+
+This endpoint can be used to verify that the FastAPI service and database are running.
+
+---
+
+# Hosted Demo
+
+## Frontend
+
+https://aws-route53-clone-pi.vercel.app
+
+## Backend
+
+https://aws-route53-backend-hz3g.onrender.com
+
+## Swagger API Documentation
+
+https://aws-route53-backend-hz3g.onrender.com/docs
+
+## ReDoc
+
+https://aws-route53-backend-hz3g.onrender.com/redoc
+
+---
+
+# Project Status
+
+**Deployment Status: Deployed and Working**
+
+The application is currently deployed using:
+
+```text
+Frontend  → Vercel
+Backend   → Render
+Database  → SQLite
+```
+
+Production communication:
+
+```text
+Vercel Frontend
+      │
+      │ HTTPS
+      ▼
+Render FastAPI Backend
+      │
+      ▼
+SQLite
+```
+
+---
+
+# Future Improvements
+
+Potential future improvements include:
+
+- [ ] Persistent production database
+- [ ] PostgreSQL migration
+- [ ] Persistent storage for SQLite
+- [ ] Additional Route 53 services
+- [ ] Traffic Policies implementation
+- [ ] Health Checks implementation
+- [ ] Resolver implementation
+- [ ] Profiles implementation
+- [ ] Custom domain deployment
+- [ ] Expanded automated test coverage
+- [ ] CI/CD pipeline
+- [ ] Production-grade secret management
+- [ ] Advanced AWS Route 53 functionality
+
+---
+
+# License
+
+This project is created for educational and demonstration purposes.
+
+It is a frontend/backend replica inspired by the AWS Route 53 Management Console and is not affiliated with or endorsed by Amazon Web Services.
