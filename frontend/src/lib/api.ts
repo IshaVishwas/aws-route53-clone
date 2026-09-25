@@ -13,7 +13,8 @@ import {
 } from "@/lib/types";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://aws-route53-backend-hz3g.onrender.com/api/v1";
 
 const TOKEN_STORAGE_KEY = "route53_session_token";
 
