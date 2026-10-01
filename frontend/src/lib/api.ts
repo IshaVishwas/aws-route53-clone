@@ -12,9 +12,48 @@ import {
   DNSRecordFilterParams,
 } from "@/lib/types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
+const PRODUCTION_FALLBACK_URL =
   "https://aws-route53-backend-hz3g.onrender.com/api/v1";
+const LOCAL_FALLBACK_URL = "http://localhost:8000/api/v1";
+
+export function getApiBaseUrl(): string {
+  // If running in browser:
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const isLocal =
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.startsWith("192.168.") ||
+      hostname.startsWith("10.");
+
+    if (isLocal) {
+      const envUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (
+        envUrl &&
+        (envUrl.includes("localhost") || envUrl.includes("127.0.0.1"))
+      ) {
+        return envUrl;
+      }
+      return LOCAL_FALLBACK_URL;
+    }
+
+    const envUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (
+      envUrl &&
+      !envUrl.includes("localhost") &&
+      !envUrl.includes("127.0.0.1")
+    ) {
+      return envUrl;
+    }
+    return PRODUCTION_FALLBACK_URL;
+  }
+
+  // Server-side (SSR / build):
+  if (process.env.NODE_ENV === "development") {
+    return LOCAL_FALLBACK_URL;
+  }
+  return process.env.NEXT_PUBLIC_API_URL || PRODUCTION_FALLBACK_URL;
+}
 
 const TOKEN_STORAGE_KEY = "route53_session_token";
 
@@ -37,7 +76,8 @@ export async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${API_BASE_URL}${
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${
     endpoint.startsWith("/") ? endpoint : `/${endpoint}`
   }`;
 
