@@ -1,8 +1,12 @@
+from typing import TYPE_CHECKING
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import String, Boolean, DateTime, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.dns_record import DNSRecord
 
 
 class HostedZone(Base):
