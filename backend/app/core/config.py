@@ -21,7 +21,9 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
+        "https://aws-route53-clone-pi.vercel.app",
     ]
+    BACKEND_CORS_ORIGIN_REGEX: str = r"^https:\/\/.*\.vercel\.app$"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -37,7 +39,11 @@ class Settings(BaseSettings):
                 pass
         elif isinstance(v, list):
             return [str(item) for item in v]
-        return ["http://localhost:3000", "http://127.0.0.1:3000"]
+        return [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://aws-route53-clone-pi.vercel.app",
+        ]
 
     model_config = SettingsConfigDict(
         env_file=".env",

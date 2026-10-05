@@ -3,13 +3,18 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from app.core.config import settings
 
+# Normalize PostgreSQL URL scheme for psycopg compatibility (Render can provide postgres://)
+database_url = settings.DATABASE_URL
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
 # For SQLite, check_same_thread=False is needed for multi-threaded FastAPI execution
 connect_args = (
-    {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
+    {"check_same_thread": False} if database_url.startswith("sqlite") else {}
 )
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    database_url,
     connect_args=connect_args,
     echo=False,
 )
