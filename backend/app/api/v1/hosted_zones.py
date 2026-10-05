@@ -121,6 +121,7 @@ def create_hosted_zone(
     db: DbSession = Depends(get_db),
     _current_user: User = Depends(get_current_user),
 ):
+
     """Create a new hosted zone. Returns 409 if domain name already exists."""
     # Check for duplicate name
     existing = db.scalar(
